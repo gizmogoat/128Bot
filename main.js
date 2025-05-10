@@ -21,6 +21,9 @@ const defaultConfig = {
             "offlinepassword": "boxpig41"
         },
         "version": "1.8.9"
+    },
+    "misc": {
+        "shortmessages": false
     }
 };
 
@@ -40,6 +43,7 @@ const auth = config.get('server.auth.type');
 const offlineUsername = config.get('server.auth.offlineusername')
 const offlinePassword = config.get('server.auth.offlinepassword')
 const version = config.get('server.version');
+const shortMessages = config.get('misc.shortmessages')
 
 const commands = {};
 fs.readdirSync('./cmds').forEach(file => {
@@ -55,21 +59,26 @@ fs.readdirSync('./cmds').forEach(file => {
 const symbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 function cChat (myBot, msg) {
     const index = Math.floor(Math.random() * symbols.length);
-    myBot.chat(`${symbols[index]} ${msg}`)
+    let finalMsg = `${symbols[index]} ${msg}`
+    // optionally split messages every 100 chars instead of 256, for weird old versions of Minecraft with ViaProxy i.e. AlphaAnarchy or 2Beta
+    if (shortMessages) {
+        myBot.chat(finalMsg.replace(/(.{100})/g, '$1\n'))
+    } else myBot.chat(finalMsg)
+
 }
 
 function createBot () {
+    let bot = undefined
     if (auth === 'offline') {
-        const bot = mineflayer.createBot({
+        bot = mineflayer.createBot({
             host: host,
             username: offlineUsername,
             auth: auth,
             port: port,
             version: version,
-            password: offlinePassword
         })
     } else {
-        const bot = mineflayer.createBot({
+        bot = mineflayer.createBot({
             host: host,
             auth: auth,
             port: port,
@@ -112,7 +121,7 @@ function createBot () {
         let randZ = Math.random() * 5 
         bot.pathfinder.setGoal(new GoalXZ(bot.entity.position.x + randX, bot.entity.position.z + randZ))  
         
-        if (bot.auth === 'offline') bot.chat
+        if (bot.auth === 'offline') bot.chat(`/login ${offlinePassword}`)
         bot.on('chat', (username, message) => {
             console.log(`<${username}> ${message}`)
             if (username === bot.username || !message.startsWith("$")) return
