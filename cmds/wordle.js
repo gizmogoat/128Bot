@@ -11,7 +11,7 @@ module.exports = (bot, username, params, cChat) => {
             if (wordleStarted) {
                 if (params[2].length === 5) {
                     console.log(`wordle guess ${params[2]}`)
-                    if (params[2] === solution) {
+                    if (params[2].toLowerCase() === solution) {
                         cChat(bot, `Congrats! ${solution.toUpperCase()} was the solution.`)
                         wordleStarted = false;
                     }
